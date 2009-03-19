@@ -234,7 +234,7 @@ class UDPComponent(wns.Node.Component):
     def __init__(self, node, name, ipDataTransmission, ipNotification, _portUnbindDelay = 60.0):
         super(UDPComponent, self).__init__(node, name)
         self.logger = Logger("UDPComponent", True, node.logger)
-        self.service = "udp.connectionService"
+        self.service = "tcp.connectionService"
         self.serviceConfig = Service(self.logger, _portUnbindDelay, "subFUN.1WH")
 
         self.ipDataTransmission = ipDataTransmission
@@ -406,7 +406,7 @@ class OneWayHandshake(wns.PyConfig.Sealed):
 
     def __init__(self, parentLogger):
         self.logger = Logger("OneWayHandshake", True, parentLogger)
-        self.udpService = 'udp.connectionService'
+        self.udpService = 'tcp.connectionService'
 
 
 class CongestionControl(wns.PyConfig.Sealed):
