@@ -35,7 +35,8 @@
 #include <WNS/ldk/Group.hpp>
 
 #include <WNS/ldk/ControlServiceInterface.hpp>
-
+#include <WNS/service/dll/FlowEstablishmentAndRelease.hpp>
+#include <WNS/service/dll/Handler.hpp>
 
 using namespace tcp;
 
@@ -60,7 +61,9 @@ Component::Component(
 	ipDataTransmission(NULL),
 	flowSeparator(NULL),
 	handshakeStrategy(NULL),
-	logger(config.get<wns::pyconfig::View>("logger"))
+	logger(config.get<wns::pyconfig::View>("logger")),
+	tcpFlowHandler(NULL),
+	fear(NULL)
 {
 } // Component
 
@@ -83,7 +86,7 @@ Component::doStartup()
 
 	ipDataTransmission = getService<wns::service::nl::Service*>(config.get<std::string>("ipDataTransmission"));
 
-        // configure ipDataHandler with Dispatcher from FUN
+	// configure ipDataHandler with Dispatcher from FUN
 	ipDataHandler->setLowerConvergence(lowerConvergence);
 
 	upperConvergence = dynamic_cast<UpperConvergence*>(
@@ -94,12 +97,36 @@ Component::doStartup()
 		fun->getFunctionalUnit(
 			getConfig().get<std::string>("flowSeparator.commandName")));
 
-	wns::ldk::ControlServiceRegistry* csr = 0;
+	wns::ldk::ControlServiceRegistry* csr = NULL;
 
-	tlService = new Service(upperConvergence, flowSeparator, config.get<wns::pyconfig::View>("serviceConfig"), csr);
+	// DLL FlowHandling:
+	// if FlowEstablishmentAndRelease is being used.
+
+	tcpFlowHandler = new tcp::FlowHandler();
+
+	if (config.isNone("flowEstablishmentAndRelease"))
+		{
+			fear = NULL;
+		}
+	else
+		{
+			fear = getService<wns::service::dll::FlowEstablishmentAndRelease*> (config.get<std::string>("flowEstablishmentAndRelease"));
+		}
+	if (config.isNone("dllNotification"))
+		{
+			dllNotification = NULL;
+		}
+	else
+		{
+			dllNotification = getService<wns::service::dll::Notification*> (config.get<std::string>("dllNotification"));
+			dllNotification->registerFlowHandler(tcpFlowHandler);
+		}
+
+	tlService = new Service(upperConvergence, lowerConvergence, flowSeparator, config.get<wns::pyconfig::View>("serviceConfig"),tcpFlowHandler, fear,  csr);
 	addService(getConfig().get<std::string>("service"), tlService);
 	fun->getLayer()->addControlService("fip", tlService);
 
+	tcpFlowHandler->setTLService(tlService);
 	lowerConvergence->setTLService(tlService);
 
 	subFUN->onFUNCreated();
@@ -127,9 +154,8 @@ Component::onNodeCreated()
 		getService<wns::service::nl::Service*>(
 			getConfig().get<std::string>("ipDataTransmission")));
 
- 	lowerConvergence->setDataTransmissionService(
- 		getService<wns::service::nl::Service*>(
-			getConfig().get<std::string>("ipDataTransmission")));
+	lowerConvergence->setDataTransmissionService(getService<wns::service::nl::Service*>(
+											    getConfig().get<std::string>("ipDataTransmission")));
 
 	wns::service::nl::protocolNumber protocolNr = stringToProtocolNumber(getConfig().get<std::string>("protocolNumber"));
 
@@ -145,7 +171,6 @@ Component::onWorldCreated()
 	tlService->setDNSService(
 		getService<wns::service::nl::DNSService*>(
 			getConfig().get<std::string>("dnsService")));
-
 }
 
 void

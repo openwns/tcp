@@ -32,7 +32,6 @@
 
 using namespace tcp;
 
-
 Connection::Connection(const wns::service::tl::FlowID& _flowID,
 		       UpperConvergence* _upperConvergence,
 		       const wns::pyconfig::View& _config) :

@@ -17,7 +17,7 @@ srcFiles = [
     'src/CongestionControl.cpp',
     'src/SlowStart.cpp',
     'src/TahoeCongAvoid.cpp',
-
+    'src/FlowHandler.cpp',
     'src/tests/CongestionControlTest.cpp',
     #'src/tests/CumulativeACKTest.cpp',
     ]
@@ -43,6 +43,7 @@ hppFiles = [
 'src/Component.hpp',
 'src/HandshakeStrategyHandlerInterface.hpp',
 'src/TahoeCongAvoid.hpp',
+'src/FlowHandler.hpp',
 'src/CongestionControl.hpp',
 ]
 

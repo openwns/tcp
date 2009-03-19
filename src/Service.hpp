@@ -31,14 +31,16 @@
 #include <set>
 
 #include <TCP/HandshakeStrategyHandlerInterface.hpp>
+#include <TCP/FlowHandler.hpp>
 
 #include <WNS/container/Registry.hpp>
-
 #include <WNS/service/tl/Service.hpp>
 #include <WNS/service/tl/PortPool.hpp>
 #include <WNS/service/nl/Service.hpp>
 #include <WNS/service/tl/FlowID.hpp>
-
+#include <WNS/service/dll/FlowEstablishmentAndRelease.hpp>
+#include <WNS/service/dll/FlowID.hpp>
+#include <WNS/service/qos/QoSClasses.hpp>
 #include <WNS/ldk/Group.hpp>
 #include <WNS/ldk/FlowSeparator.hpp>
 
@@ -47,7 +49,9 @@ namespace tcp {
 
 	class Connection;
 	class UpperConvergence;
+	class LowerConvergence;
 	class HandshakeStrategyInterface;
+	class FlowHandler;
 
 	/**
 	 * @brief TCP service implementation.
@@ -62,8 +66,11 @@ namespace tcp {
 	{
 	public:
 		Service(UpperConvergence* _upperConvergence,
+			LowerConvergence* _lowerConvergence,
 			wns::ldk::FlowSeparator* _flowSeparator,
 			const wns::pyconfig::View& _pyco,
+			tcp::FlowHandler* _tcpFlowHandler,
+			wns::service::dll::FlowEstablishmentAndRelease* _fear,
 			wns::ldk::ControlServiceRegistry* _csr);
 
 		virtual
@@ -74,12 +81,28 @@ namespace tcp {
 			wns::service::tl::Port _port,
 			wns::service::tl::ConnectionHandler* _ch);
 
+		/**
+		 * @brief OpenConnection method is divided into two methods,
+		 * because of FlowHandling at DLL.
+		 *
+		 * openConnectionContinue(..) method continues with the
+		 * connection establishment after the DLL flow has been established.
+		 * @return bool
+		 */
 		virtual void
 		openConnection(
 			wns::service::tl::Port _port,
 			wns::service::nl::FQDN _source,
 			wns::service::nl::FQDN _peerAddress,
+			wns::service::qos::QoSClass _qosClass,
 			wns::service::tl::ConnectionHandler* _ch);
+
+		virtual void
+		openConnectionContinue(
+			wns::service::tl::FlowID flowID, wns::service::dll::FlowID dllFlowID = 0);
+
+		void
+		dllFlowChanged(wns::service::tl::FlowID flowID, wns::service::dll::FlowID dllFlowID);
 
 		virtual void
 		closeConnection(wns::service::tl::Connection* _connection);
@@ -111,6 +134,9 @@ namespace tcp {
 
 		void
 		setDNSService(wns::service::nl::DNSService* service);
+
+		void
+		setTcpFlowHandlerService(tcp::FlowHandler* service);
 
 		/**
 		 * @brief Query wether a upper layer service is listening to a
@@ -228,6 +254,8 @@ namespace tcp {
 
 		wns::service::nl::DNSService* dns;
 
+		tcp::FlowHandler* tcpFlowHandler;
+
 		/**
 		 * @brief Mapping of flow id to corresponding opened connection
 		 */
@@ -267,11 +295,16 @@ namespace tcp {
 		UpperConvergence* upperConvergence;
 
 		/**
+		 * @brief The lower FU of TCP's FUN
+		 */
+		LowerConvergence* lowerConvergence;
+
+		/**
 		 * @brief The flow separator FU of TCP's FUN
 		 */
 		wns::ldk::FlowSeparator* flowSeparator;
+		wns::service::dll::FlowEstablishmentAndRelease* flowEstablishmentAndRelease;
 	};
 } // namespace tcp
-
 
 #endif // NOT defined TCP_SERVICE_HPP

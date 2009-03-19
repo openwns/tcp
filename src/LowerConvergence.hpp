@@ -28,8 +28,10 @@
 #ifndef TCP_LOWERCONVERGENCE_HPP
 #define TCP_LOWERCONVERGENCE_HPP
 
+#include <WNS/service/tl/FlowID.hpp>
 #include <WNS/service/nl/DataHandler.hpp>
 #include <WNS/service/nl/Service.hpp>
+#include <WNS/service/dll/FlowID.hpp>
 #include <WNS/ldk/CommandTypeSpecifier.hpp>
 #include <WNS/ldk/HasReceptor.hpp>
 #include <WNS/ldk/HasConnector.hpp>
@@ -49,6 +51,8 @@ namespace tcp {
 		public wns::Cloneable<LowerConvergence>
 	{
 	public:
+		typedef wns::container::Registry<wns::service::tl::FlowID, wns::service::dll::FlowID> FlowIDMapping;
+
 		LowerConvergence(wns::ldk::fun::FUN* fun, const wns::pyconfig::View& _config);
 
 		virtual
@@ -79,6 +83,12 @@ namespace tcp {
 		 */
 		void
 		setTLService(Service* _tlService);
+
+		void
+		mapFlowID(wns::service::tl::FlowID flowID, wns::service::dll::FlowID dllFlowID);
+
+		void
+		unmapFlowID(wns::service::tl::FlowID flowID);
 
 	private:
 		/**
@@ -116,6 +126,8 @@ namespace tcp {
 		 * data transmission service with a protocol ID.
 		 */
 		wns::service::nl::protocolNumber protocolNumber;
+
+		FlowIDMapping flowIDMapper;
 
         wns::ldk::CommandReaderInterface* tcpHeaderReader;
 	};

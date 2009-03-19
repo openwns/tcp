@@ -56,18 +56,21 @@ class TCPComponent(wns.Node.Component):
                                    to build a Component
                                    (of this special type)""",
                                    default = "tcp.Component")
-    
     logger = None
-    
+
     service = None
-    
     serviceConfig = None
-    
     protocolNumber = 'TCP'
-    
+    dataLinkLayer = None
+
     fun = None
     """ Functional Unit Network """
-    
+    tcpFlowHandler = None
+    """ Used for FlowEstablishment at Layer2 """
+    flowEstablishmentAndRelease = None
+
+    dllNotification = None
+
     subFUN = None
     """ Prototype of function unit network for flow separator """
 
@@ -94,10 +97,8 @@ class TCPComponent(wns.Node.Component):
 
     subFUNARQ = None
     """ Lower FU in the flow separator """
-    
     subFUNHandshakeStrategy = None
     """ TCP's finite state machine for 3-way-handshake connection establishement and termination """
-    
     subFUNDispatcher = None
     """ Responsible for dispatching TCP's user data plane and control plane """
 
@@ -118,22 +119,17 @@ class TCPComponent(wns.Node.Component):
         
         self.ipDataTransmission = ipDataTransmission
         self.ipNotification = ipNotification
-        
         self.fun = wns.FUN.FUN()
-        
         self.tcpHeader = wns.FUN.Node("tcp.tcpHeader", TCPHeader(parentLogger=self.logger))
 
         self.upperConvergence = wns.FUN.Node("TCP.upperConvergence", UpperConvergence(self.logger))
-        
         self.subFUN = wns.FUN.FUN()
-        
         #self.subFUNARQ = wns.FUN.Node('subFUN.ARQ', wns.ARQ.CumulativeACK(self.logger))
         self.subFUNARQ = wns.FUN.Node('subFUN.ARQ', CumulativeACK(self.logger))
         self.subFUNSAR = wns.FUN.Node('subFUN.SAR', wns.SAR.Fixed(segmentSize=512, parentLogger = self.logger))
         self.subFUNBuffer = wns.FUN.Node('subFUN.Buffer', wns.Buffer.Dropping(size=512))
         self.subFUNHandshakeStrategy = wns.FUN.Node('subFUN.3WH', ThreeWayHandshake(self.logger, 'TCP.upperConvergence'))
         self.subFUNDispatcher = wns.FUN.Node('subFUN.Dispatcher', wns.Multiplexer.Dispatcher(opcodeSize = 1, parentLogger=self.logger))
-        
         self.subFUN.add(self.subFUNARQ)
         self.subFUN.add(self.subFUNSAR)
         self.subFUN.add(self.subFUNBuffer)
@@ -151,23 +147,23 @@ class TCPComponent(wns.Node.Component):
         #creator = wns.FlowSeparator.Prototype('flowSeparatorPrototype', self.group)
         creator = wns.FlowSeparator.Config('flowSeparatorPrototype', self.group)
         ifNotFoundStrategy = wns.FlowSeparator.CreateOnValidFlow(creator, 'fip')
-	
         self.flowSeparator = wns.FUN.Node("flowSeparator",
                                           wns.FlowSeparator.FlowSeparator(FlowIDBuilder("TCP.upperConvergence"),
                                                                           ifNotFoundStrategy))
-        
         self.lowerConvergence = wns.FUN.Node("TCP.lowerConvergence", LowerConvergence('TCP.upperConvergence', self.logger))
-        
         self.portUnbindDelay = _portUnbindDelay
 
         self.fun.add(self.tcpHeader)
         self.fun.add(self.upperConvergence)
         self.fun.add(self.flowSeparator)
         self.fun.add(self.lowerConvergence)
-        
         self.upperConvergence.connect(self.flowSeparator)
         self.flowSeparator.connect(self.lowerConvergence)
-        
+
+    def addFlowHandling(self, _dllNotification, _flowEstablishmentAndRelease):
+        self.dllNotification = _dllNotification
+        self.flowEstablishmentAndRelease = _flowEstablishmentAndRelease
+
 
 
 class UDPComponent(wns.Node.Component):
@@ -202,6 +198,10 @@ class UDPComponent(wns.Node.Component):
 
     ipNotification = None
     """ Name of the service to use for notification from IP """
+
+    flowEstablishmentAndRelease = None
+
+    dllNotification = None
 
     dnsService = "ip.dns"
 
@@ -330,6 +330,13 @@ class LowerConvergence(wns.PyConfig.Sealed):
         self.upperConvergence = upperConvergenceName
         self.flowSeparator = "flowSeparator"
 
+class FlowHandler(wns.PyConfig.Sealed):
+
+    __plugin__ = "tcp.FlowHandler"
+    logger = None
+
+    def __init__(self, parentLogger):
+        self.logger = Logger("FlowHandler", True, parentLogger)
 
 class Service(wns.PyConfig.Sealed):
 
@@ -359,8 +366,6 @@ class UpperConvergence(wns.PyConfig.Sealed):
     def __init__(self, parentLogger):
         self.logger = Logger("UpperConvergence", True, parentLogger)
 
-        
-
 class FlowIDBuilder(wns.PyConfig.Sealed):
     __plugin__ = 'tcp.FlowIDBuilder'
 
@@ -380,7 +385,7 @@ class ThreeWayHandshake(wns.PyConfig.Sealed):
 
     upperConvergence = None
     """ The friend FU """
-    
+
     def __init__(self, parentLogger, upperConvergenceName):
         self.logger = Logger("ThreeWayHandshake", True, parentLogger)
         self.tcpService = 'tcp.connectionService'
@@ -413,7 +418,7 @@ class CongestionControl(wns.PyConfig.Sealed):
         self.slowStart = SlowStart(parentLogger)
         self.tahoeCA = TahoeCongAvoid(parentLogger)
 
-        
+
 class SlowStart(wns.PyConfig.Sealed):
     __plugin__ = 'tcp.SlowStart'
 
@@ -465,4 +470,3 @@ class CumulativeACK(wns.PyConfig.Sealed):
         self.logger = Logger('CumulativeACK', True, parentLogger)
         self.congestionControl = CongestionControl(parentLogger)
         self.advertisedWindow = advWin
-        

@@ -28,8 +28,10 @@
 #include <TCP/Service.hpp>
 #include <TCP/Connection.hpp>
 #include <TCP/UpperConvergence.hpp>
+#include <TCP/LowerConvergence.hpp>
 #include <TCP/ConnectionHandler.hpp>
 #include <TCP/HandshakeStrategyInterface.hpp>
+#include <TCP/FlowHandler.hpp>
 #include <TCP/FlowIDBuilder.hpp>
 
 #include <WNS/service/tl/PortPool.hpp>
@@ -37,13 +39,16 @@
 #include <WNS/service/tl/FlowID.hpp>
 
 #include <WNS/module/Base.hpp>
+#include <WNS/service/dll/FlowEstablishmentAndRelease.hpp>
 
 using namespace tcp;
 
-
 Service::Service(UpperConvergence* _upperConvergence,
+		 LowerConvergence* _lowerConvergence,
 		 wns::ldk::FlowSeparator* _flowSeparator,
 		 const wns::pyconfig::View& _pyco,
+		 tcp::FlowHandler* _tcpFlowHandler,
+		 wns::service::dll::FlowEstablishmentAndRelease* _fear,
 		 wns::ldk::ControlServiceRegistry* _csr) :
 	wns::ldk::ControlService(_csr),
 	removeDelay(2),
@@ -55,7 +60,10 @@ Service::Service(UpperConvergence* _upperConvergence,
 	logger(_pyco.get("logger")),
 	pyco(_pyco),
 	upperConvergence(_upperConvergence),
-	flowSeparator(_flowSeparator)
+	lowerConvergence(_lowerConvergence),
+	flowSeparator(_flowSeparator),
+	flowEstablishmentAndRelease(_fear),
+	tcpFlowHandler(_tcpFlowHandler)
 {
 	upperConvergence->setTLService(this);
 }
@@ -94,6 +102,7 @@ Service::openConnection(
 	wns::service::tl::Port _dstPort,
 	wns::service::nl::FQDN _source,
 	wns::service::nl::FQDN _dstAddress,
+	wns::service::qos::QoSClass _qosClass,
 	wns::service::tl::ConnectionHandler* _ch)
 {
 	assure(_dstPort >= 0 && _dstPort <= 65535, "Valid port numbers are: 0-65535 (is " << _dstPort << ")");
@@ -109,13 +118,32 @@ Service::openConnection(
 
 	flowIDToConnectionHandler.insert(flowID, _ch);
 
-    assure(!flowIDToConnections.knows(flowID), "Connection already created for flowID " << flowID);
+	assure(!flowIDToConnections.knows(flowID), "Connection already created for flowID " << flowID);
+	MESSAGE_SINGLE(NORMAL, logger, "TCP OpenConnection called for: " << flowID);
+
+	if(flowEstablishmentAndRelease == NULL)
+	{
+		openConnectionContinue(flowID, 0);
+	}
+	else
+	{
+		MESSAGE_SINGLE(NORMAL, logger, "Triggering FlowEstablishment at Layer2 for FlowID: " <<flowID);
+		flowEstablishmentAndRelease->establishFlow(flowID,_qosClass);
+	}
+}
+
+void
+Service::openConnectionContinue(wns::service::tl::FlowID flowID, wns::service::dll::FlowID dllFlowID)
+{
 	Connection* connection = new Connection(
 		flowID, upperConvergence, this->pyco.get<wns::pyconfig::View>("connection"));
 
+	lowerConvergence->mapFlowID(flowID, dllFlowID);
+
+	assure(!flowIDToConnections.knows(flowID), "There is already a Connection for flowID "<< flowID);
 	flowIDToConnections.insert(flowID, connection);
 
-    MESSAGE_SINGLE(NORMAL, logger, "Opening connection for flowID " << flowID);
+    MESSAGE_SINGLE(NORMAL, logger, "Opening connection for FlowID " << flowID);
     assure(!listeners.knows(flowID.srcPort), "Unable to open source port " << flowID  << " actively. Application is listening.");
 	addFlowSeparatorInstance(flowID);
 
@@ -126,6 +154,14 @@ Service::openConnection(
 
 	handshakeStrategy->registerStrategyHandler(this);
 	handshakeStrategy->activeOpen(flowID);
+}
+
+void
+Service::dllFlowChanged(wns::service::tl::FlowID flowID, wns::service::dll::FlowID dllFlowID)
+{
+       // delete old Flow, save new one
+	lowerConvergence->unmapFlowID(flowID);
+	lowerConvergence->mapFlowID(flowID, dllFlowID);
 }
 
 void
@@ -203,6 +239,14 @@ Service::setDataTransmissionService(wns::service::nl::Service* _ipService)
 	ipService = _ipService;
 
 	MESSAGE_SINGLE(NORMAL, logger, "IP services registered.");
+}
+
+void
+Service::setTcpFlowHandlerService(tcp::FlowHandler* _flowHandler)
+{
+	assure(_flowHandler, "invalid TcpFlowHandler service (NULL)!");
+	tcpFlowHandler = _flowHandler;
+	MESSAGE_SINGLE(NORMAL, logger, "TcpFlowHandler service registered.");
 }
 
 void
@@ -294,6 +338,16 @@ Service::connectionClosed(const wns::service::tl::FlowID& _flowID)
 	}
 
 	wns::simulator::getEventScheduler()->scheduleNow(RemoveFlowSeparatorInstance(this, _flowID));
+	// release the flow in layer 2
+	lowerConvergence->unmapFlowID(_flowID);
+
+	if(!(flowEstablishmentAndRelease == NULL))
+	{
+		MESSAGE_SINGLE(NORMAL, logger, "Deleting DLLFlow for TlFlowID: " <<_flowID);
+		flowEstablishmentAndRelease->releaseFlow(_flowID);
+	}
+
+	// release flow in layer 2 only if there is a layer 2 at this peer
 	delete _connection;
 }
 
@@ -310,6 +364,8 @@ Service::passiveClosed(const wns::service::tl::FlowID& _flowID)
 	flowIDToConnections.erase(_flowID);
 
 	wns::simulator::getEventScheduler()->scheduleNow(RemoveFlowSeparatorInstance(this, _flowID));
+	// the right place to release the flow in layer 2
+	// release flow in layer 2 only if there is a layer 2 at this peer
 	delete _connection;
 }
 void

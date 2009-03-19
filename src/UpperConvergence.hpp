@@ -92,7 +92,6 @@ namespace tcp {
         TCPHeader* tcpHeaderFU;
 
         wns::ldk::CommandReaderInterface* tcpHeaderReader;
-        
 	};
 
 } // namespace tcp

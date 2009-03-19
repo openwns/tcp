@@ -29,18 +29,17 @@
 #define TCP_COMPONENT_HPP
 
 #include <TCP/UpperConvergence.hpp>
+#include <TCP/FlowHandler.hpp>
 
 #include <WNS/node/component/Component.hpp>
-
 #include <WNS/ldk/Layer.hpp>
 #include <WNS/ldk/fun/Main.hpp>
 #include <WNS/ldk/fun/Sub.hpp>
 #include <WNS/ldk/FlowSeparator.hpp>
-
 #include <WNS/logger/Logger.hpp>
-
 #include <WNS/service/nl/Service.hpp>
-
+#include <WNS/service/dll/FlowEstablishmentAndRelease.hpp>
+#include <WNS/service/dll/Handler.hpp>
 
 namespace tcp {
 
@@ -140,6 +139,13 @@ namespace tcp {
 		HandshakeStrategyInterface* handshakeStrategy;
 
 		wns::logger::Logger logger;
+
+		/**
+		 * @brief FlowHandler
+		 */
+		tcp::FlowHandler* tcpFlowHandler;
+		wns::service::dll::FlowEstablishmentAndRelease* fear;
+		wns::service::dll::Notification* dllNotification;
 	};
 
 } // namespace tcp
