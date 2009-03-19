@@ -63,7 +63,8 @@ Component::Component(
 	handshakeStrategy(NULL),
 	logger(config.get<wns::pyconfig::View>("logger")),
 	tcpFlowHandler(NULL),
-	fear(NULL)
+	fear(NULL),
+	dllNotification(NULL)
 {
 } // Component
 
@@ -104,23 +105,15 @@ Component::doStartup()
 
 	tcpFlowHandler = new tcp::FlowHandler();
 
-	if (config.isNone("flowEstablishmentAndRelease"))
-		{
-			fear = NULL;
-		}
-	else
-		{
-			fear = getService<wns::service::dll::FlowEstablishmentAndRelease*> (config.get<std::string>("flowEstablishmentAndRelease"));
-		}
-	if (config.isNone("dllNotification"))
-		{
-			dllNotification = NULL;
-		}
-	else
-		{
-			dllNotification = getService<wns::service::dll::Notification*> (config.get<std::string>("dllNotification"));
-			dllNotification->registerFlowHandler(tcpFlowHandler);
-		}
+	if (!config.isNone("flowEstablishmentAndRelease"))
+	  {
+	    fear = getService<wns::service::dll::FlowEstablishmentAndRelease*> (config.get<std::string>("flowEstablishmentAndRelease"));
+	  }
+	if (!config.isNone("dllNotification"))
+	  {
+	    dllNotification = getService<wns::service::dll::Notification*> (config.get<std::string>("dllNotification"));
+	    dllNotification->registerFlowHandler(tcpFlowHandler);
+	  }
 
 	tlService = new Service(upperConvergence, lowerConvergence, flowSeparator, config.get<wns::pyconfig::View>("serviceConfig"),tcpFlowHandler, fear,  csr);
 	addService(getConfig().get<std::string>("service"), tlService);

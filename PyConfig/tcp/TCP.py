@@ -136,12 +136,14 @@ class TCPComponent(wns.Node.Component):
         self.subFUN.add(self.subFUNDispatcher)
         self.subFUN.add(self.subFUNHandshakeStrategy)
         
-        self.subFUNSAR.connect(self.subFUNBuffer)
-        self.subFUNBuffer.connect(self.subFUNARQ)
-        self.subFUNARQ.connect(self.subFUNDispatcher)
+        #self.subFUNSAR.connect(self.subFUNBuffer)
+        #self.subFUNBuffer.connect(self.subFUNARQ)
+        #self.subFUNARQ.connect(self.subFUNDispatcher)
+        self.subFUNBuffer.connect(self.subFUNDispatcher)
         self.subFUNHandshakeStrategy.connect(self.subFUNDispatcher)
         
-        self.group = wns.Group.Group(self.subFUN, 'subFUN.SAR', 'subFUN.Dispatcher')
+        #self.group = wns.Group.Group(self.subFUN, 'subFUN.SAR', 'subFUN.Dispatcher')
+        self.group = wns.Group.Group(self.subFUN, 'subFUN.Buffer', 'subFUN.Dispatcher')
         
         #ifNotFoundStrategy = wns.FlowSeparator.PrototypeCreator('flowSeparatorPrototype', self.group)
         #creator = wns.FlowSeparator.Prototype('flowSeparatorPrototype', self.group)
@@ -163,7 +165,6 @@ class TCPComponent(wns.Node.Component):
     def addFlowHandling(self, _dllNotification, _flowEstablishmentAndRelease):
         self.dllNotification = _dllNotification
         self.flowEstablishmentAndRelease = _flowEstablishmentAndRelease
-
 
 
 class UDPComponent(wns.Node.Component):
@@ -275,6 +276,10 @@ class UDPComponent(wns.Node.Component):
 
         self.upperConvergence.connect(self.flowSeparator)
         self.flowSeparator.connect(self.lowerConvergence)
+
+    def addFlowHandling(self, _dllNotification, _flowEstablishmentAndRelease):
+        self.dllNotification = _dllNotification
+        self.flowEstablishmentAndRelease = _flowEstablishmentAndRelease
 
 
 class Connection(wns.PyConfig.Sealed):
