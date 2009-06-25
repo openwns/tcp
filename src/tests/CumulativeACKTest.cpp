@@ -62,7 +62,7 @@ namespace tcp { namespace tests {
 		wns::pyconfig::Parser all;
 
 		struct testSetup {
-			wns::ldk::Layer* layer;
+			wns::ldk::ILayer* layer;
 
 			wns::ldk::fun::Main* fun;
 			
