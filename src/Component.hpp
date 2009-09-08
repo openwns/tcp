@@ -43,110 +43,110 @@
 
 namespace tcp {
 
-	class Service;
-	class IPDataHandler;
-	class UpperConvergence;
-	class LowerConvergence;
-	class HandshakeStrategyInterface;
+    class Service;
+    class IPDataHandler;
+    class UpperConvergence;
+    class LowerConvergence;
+    class HandshakeStrategyInterface;
 
-	/**
-	 * @brief Offers a TCP service to higher layers
-	 * @author Marc Schinnenburg <msg@comnets.rwth-aachen.de>
-	 */
-	class Component :
-		virtual public wns::ldk::Layer,
-		public wns::node::component::Component
-	{
-	public:
-		Component(wns::node::Interface* node,
-			  const wns::pyconfig::View& config);
+    /**
+     * @brief Offers a TCP service to higher layers
+     * @author Marc Schinnenburg <msg@comnets.rwth-aachen.de>
+     */
+    class Component :
+            virtual public wns::ldk::Layer,
+            public wns::node::component::Component
+    {
+    public:
+        Component(wns::node::Interface* node,
+                  const wns::pyconfig::View& config);
 
-		virtual
-		~Component();
+        virtual
+        ~Component();
 
-		virtual void
-		onNodeCreated();
+        virtual void
+        onNodeCreated();
 
-		virtual void
-		onWorldCreated();
+        virtual void
+        onWorldCreated();
 
-		virtual void
-		onShutdown();
+        virtual void
+        onShutdown();
 
-	private:
-		Component(const Component&);	// disallow copy constructor
-		Component& operator=(const Component&); // disallow assignment
+    private:
+        Component(const Component&);	// disallow copy constructor
+        Component& operator=(const Component&); // disallow assignment
 
-		/**
-		 * @brief Setup Component
-		 */
-		virtual void
-		doStartup();
+        /**
+         * @brief Setup Component
+         */
+        virtual void
+        doStartup();
 
-		/**
-		 * @brief Converting a protocol description from PyConfig
-		 * to a protocol ID defined in wns::service::nl::protocolNumber
-		 */
-		wns::service::nl::protocolNumber
-		stringToProtocolNumber(std::string _protNr);
+        /**
+         * @brief Converting a protocol description from PyConfig
+         * to a protocol ID defined in wns::service::nl::protocolNumber
+         */
+        wns::service::nl::protocolNumber
+        stringToProtocolNumber(std::string _protNr);
 
-		/**
-		 * @brief TCP's functional unit network
-		 */
-		wns::ldk::fun::Main* fun;
+        /**
+         * @brief TCP's functional unit network
+         */
+        wns::ldk::fun::Main* fun;
 
-		/**
-		 * @brief This group of functional units is the prototype of the
-		 * flow separator. For each key (flow id) a new object of the
-		 * prototype is instantiatedf.
-		 */
-		wns::ldk::fun::Sub* subFUN;
+        /**
+         * @brief This group of functional units is the prototype of the
+         * flow separator. For each key (flow id) a new object of the
+         * prototype is instantiatedf.
+         */
+        wns::ldk::fun::Sub* subFUN;
 
-		/**
-		 * @brief The service TCP is providing to upper layer
-		 */
-		Service* tlService;
+        /**
+         * @brief The service TCP is providing to upper layer
+         */
+        Service* tlService;
 
-		/**
-		 * @brief The top level functional unit of TCP's FUN.
-		 */
-		UpperConvergence* upperConvergence;
+        /**
+         * @brief The top level functional unit of TCP's FUN.
+         */
+        UpperConvergence* upperConvergence;
 
-		/**
-		 * @brief The notification service provided to the IP layer. All
-		 * incoming data is forwarded to the dispatcher.
-		 */
-		IPDataHandler* ipDataHandler;
+        /**
+         * @brief The notification service provided to the IP layer. All
+         * incoming data is forwarded to the dispatcher.
+         */
+        IPDataHandler* ipDataHandler;
 
-		/**
-		 * @brief The bottem functional unit of TCP's FUN.
-		 */
-		LowerConvergence* lowerConvergence;
+        /**
+         * @brief The bottem functional unit of TCP's FUN.
+         */
+        LowerConvergence* lowerConvergence;
 
-		/**
-		 * @brief Data transimission service provided by IP layer
-		 */
-		wns::service::nl::Service* ipDataTransmission;
+        /**
+         * @brief Data transimission service provided by IP layer
+         */
+        wns::service::nl::Service* ipDataTransmission;
 
-		/**
-		 * @brief The flow separator FU in TCP's FUN
-		 */
-		wns::ldk::FlowSeparator* flowSeparator;
+        /**
+         * @brief The flow separator FU in TCP's FUN
+         */
+        wns::ldk::FlowSeparator* flowSeparator;
 
-		/**
-		 * @brief Connection control FU within the flow separator's prototype instance
-		 */
-		HandshakeStrategyInterface* handshakeStrategy;
+        /**
+         * @brief Connection control FU within the flow separator's prototype instance
+         */
+        HandshakeStrategyInterface* handshakeStrategy;
 
-		wns::logger::Logger logger;
+        wns::logger::Logger logger;
 
-		/**
-		 * @brief FlowHandler
-		 */
-		tcp::FlowHandler* tcpFlowHandler;
-		wns::service::dll::FlowEstablishmentAndRelease* fear;
-		wns::service::dll::Notification* dllNotification;
-	};
+        /**
+         * @brief FlowHandler
+         */
+        tcp::FlowHandler* tcpFlowHandler;
+        wns::service::dll::FlowEstablishmentAndRelease* fear;
+        wns::service::dll::Notification* dllNotification;
+    };
 
 } // namespace tcp
 
