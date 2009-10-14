@@ -66,6 +66,5 @@ TCPHeader::calculateSizes(const wns::ldk::CommandPool* commandPool,
 {
     getFUN()->calculateSizes(commandPool, commandPoolSize, dataSize, this);
 
-    // TCP header size is 20 byte
-    commandPoolSize += 20*8;
+    commandPoolSize += headerSize;
 }

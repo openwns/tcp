@@ -242,7 +242,7 @@ class UDPComponent(wns.Node.Component):
 
         self.fun = wns.FUN.FUN()
 
-        self.udpHeader = wns.FUN.Node("tcp.tcpHeader", TCPHeader(parentLogger=self.logger))
+        self.udpHeader = wns.FUN.Node("tcp.tcpHeader", UDPHeader(parentLogger=self.logger))
 
         self.upperConvergence = wns.FUN.Node("UDP.upperConvergence", UpperConvergence(self.logger))
 
@@ -307,7 +307,7 @@ class TCPHeader(wns.PyConfig.Sealed):
 
 class UDPHeader(wns.PyConfig.Sealed):
 
-    __plugin__ = "udp.udpHeader"
+    __plugin__ = "tcp.tcpHeader"
 
     headerSize = 8*8
 

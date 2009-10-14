@@ -111,8 +111,8 @@ namespace tcp {
 
     private:
         /**
-		 * @brief Allow for changing the IP-header size from the default
-		 *        20*8b
+		 * @brief Allow for changing the TCP-header size from the default
+		 *        20*8b (UDP header: 8*8bit)
          */
         Bit headerSize;
 
