@@ -25,7 +25,7 @@
 #
 ###############################################################################
 
-import wns.WNS
+import openwns
 import tcp.TCP
 
-wns.WNS.WNS.modules.tcp = TCP.TCP()
+openwns.simulator.OpenWNS.modules.tcp = TCP.TCP()
