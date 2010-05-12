@@ -58,7 +58,7 @@ CumulativeACK::CumulativeACK(wns::ldk::fun::FUN* _fun, const wns::pyconfig::View
 	logger(pyco.get("logger")),
 	fun(_fun),
 	ccStrategy(NULL),
-	advertisedWindowSize(pyco.get<uint32_t>("advertisedWindow")),
+	advertisedWindowSize(pyco.get<unsigned long int>("advertisedWindow")),
 	sequenceNR(0),
 	ackNR(0),
 	lastACKInOrder(0),
@@ -144,7 +144,7 @@ CumulativeACK::doOnData(const wns::ldk::CompoundPtr& _compound)
 			{
 				receivingCompounds.insert(ackNR, _compound);
 			}
-			catch (wns::container::Registry<uint32_t, wns::ldk::CompoundPtr>::DuplicateKeyValue)
+			catch (wns::container::Registry<unsigned long int, wns::ldk::CompoundPtr>::DuplicateKeyValue)
 			{
 				// accept duplicate TCP segments
 			}
@@ -252,7 +252,7 @@ CumulativeACK::doOnData(const wns::ldk::CompoundPtr& _compound)
 
 			// all segments up to ack-nr. - 1 successfully received
 			// remove all predecessors
-			uint32_t tmp = lastACKInOrder - 1;
+			unsigned long int tmp = lastACKInOrder - 1;
 			while(sendingCompounds.knows(tmp))
 			{
 				// ack all unacked packets
@@ -345,7 +345,7 @@ CumulativeACK::doSendData(const wns::ldk::CompoundPtr& _compound)
 
 
 void
-CumulativeACK::retransmitData(const uint32_t seqNr)
+CumulativeACK::retransmitData(const unsigned long int seqNr)
 {
 	wns::ldk::CompoundPtr _compound;
 	try
@@ -390,14 +390,14 @@ CumulativeACK::doWakeup()
 }
 
 
-uint32_t
-CumulativeACK::min(const uint32_t x, const uint32_t y) const
+unsigned long int
+CumulativeACK::min(const unsigned long int x, const unsigned long int y) const
 {
 	return (x<=y) ? x : y;
 }
 
 
-uint32_t
+unsigned long int
 CumulativeACK::sendCredit() const
 {
 	if (ccStrategy->getWindowSize() > sendingCompounds.size())

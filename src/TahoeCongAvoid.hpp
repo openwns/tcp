@@ -52,12 +52,12 @@ namespace tcp {
 		 * @brief Implementation of the CongestionAvoidanceStrategy interface
 		 */
 		virtual void
-		onSegmentLoss(segmentLoss _sl, uint32_t _ackNR);
+		onSegmentLoss(segmentLoss _sl, unsigned long int _ackNR);
 
 		virtual void
 		onRTTSample();
 
-		virtual uint32_t
+		virtual unsigned long int
 		getWindowSize();
 
 		virtual simTimeType
@@ -67,10 +67,10 @@ namespace tcp {
 		onSegmentAcknowledged();
 
 		virtual void
-		setWindowSize(uint32_t new_cwnd);
+		setWindowSize(unsigned long int new_cwnd);
 
 		virtual bool
-		duplicateACKThresholdReached(uint32_t _ackNR);
+		duplicateACKThresholdReached(unsigned long int _ackNR);
 
 		virtual void
 		clearDuplicateACKCounter();
@@ -84,13 +84,13 @@ namespace tcp {
 		/**
 		 * @brief The size of the congestion window
 		 */
-		uint32_t cwnd;
+		unsigned long int cwnd;
 
 		/**
 		 * @brief Counter to increase congestion window
 		 * cwnd linear
 		 */
-		uint32_t cwnd_cnt;
+		unsigned long int cwnd_cnt;
 
 		/**
 		 * @brief Tahoe's logger
@@ -111,7 +111,7 @@ namespace tcp {
 		 * @brief Registry for counting the number of duplicate acks of
 		 * regarding the same acknowledgement number
 		 */
-		wns::container::Registry<uint32_t, int> countDuplicateACKs;
+		wns::container::Registry<unsigned long int, int> countDuplicateACKs;
 	};
 } // namespace tcp
 

@@ -41,7 +41,7 @@ STATIC_FACTORY_REGISTER_WITH_CREATOR(
 SlowStart::SlowStart(const wns::pyconfig::View& _pyco):
 	pyco(_pyco),
 	cwnd(pyco.get<int>("congestionWindow")),
-	ssthresh(pyco.get<uint32_t>("ssthresh")),
+	ssthresh(pyco.get<unsigned long int>("ssthresh")),
 	logger(pyco.get("logger")),
 	timeout(pyco.get<simTimeType>("retransmissionTimeout"))
 {
@@ -54,7 +54,7 @@ SlowStart::~SlowStart()
 
 
 void
-SlowStart::onSegmentLoss(segmentLoss reason, uint32_t /*_ackNR*/)
+SlowStart::onSegmentLoss(segmentLoss reason, unsigned long int /*_ackNR*/)
 {
 	MESSAGE_SINGLE(NORMAL, logger, "onSegmentLoss called. Reason: " << printReason(reason));
 
@@ -82,7 +82,7 @@ SlowStart::onRTTSample()
 }
 
 
-uint32_t
+unsigned long int
 SlowStart::getWindowSize()
 {
 	return cwnd;
@@ -106,7 +106,7 @@ SlowStart::onSegmentAcknowledged()
 
 
 void
-SlowStart::setWindowSize(uint32_t new_cwnd)
+SlowStart::setWindowSize(unsigned long int new_cwnd)
 {
 	MESSAGE_SINGLE(NORMAL, logger, "Setting window size: " << new_cwnd << "(old value: " << cwnd << ")");
 	cwnd = new_cwnd;
@@ -114,7 +114,7 @@ SlowStart::setWindowSize(uint32_t new_cwnd)
 
 
 bool
-SlowStart::duplicateACKThresholdReached(uint32_t /*_ackNR*/)
+SlowStart::duplicateACKThresholdReached(unsigned long int /*_ackNR*/)
 {
 	// threshold for fast retransmit; implemented in tahoe congestion avoidance
 	assure(false, "SlowStart::duplicateACKThresholdReached should never be called!");
@@ -128,7 +128,7 @@ SlowStart::clearDuplicateACKCounter()
 }
 
 
-uint32_t
+unsigned long int
 SlowStart::getSlowStartThreshold()
 {
 	MESSAGE_SINGLE(NORMAL, logger, "SlowStart threshold: " << ssthresh);
@@ -139,7 +139,7 @@ SlowStart::getSlowStartThreshold()
 void
 SlowStart::reCalcThreshold()
 {
-	uint32_t prior_ssthresh __attribute__ ((unused)) = ssthresh;
+	unsigned long int prior_ssthresh __attribute__ ((unused)) = ssthresh;
 	this->ssthresh = max(getWindowSize()>>1, 2);
 	MESSAGE_SINGLE(NORMAL, logger, "Recalculate SlowStart threshold: " << ssthresh << "(old value: " << prior_ssthresh << ").");
 }
@@ -163,8 +163,8 @@ SlowStart::printReason(segmentLoss reason)
 }
 
 
-uint32_t
-SlowStart::max(uint32_t x, uint32_t y)
+unsigned long int
+SlowStart::max(unsigned long int x, unsigned long int y)
 {
 	return (x<y) ? y : x;
 }

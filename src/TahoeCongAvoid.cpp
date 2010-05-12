@@ -40,8 +40,8 @@ STATIC_FACTORY_REGISTER_WITH_CREATOR(
 
 TahoeCongAvoid::TahoeCongAvoid(const wns::pyconfig::View& _pyco):
 	pyco(_pyco),
-	cwnd(pyco.get<uint32_t>("congestionWindow")),
-	cwnd_cnt(pyco.get<uint32_t>("congestionWindowCounter")),
+	cwnd(pyco.get<unsigned long int>("congestionWindow")),
+	cwnd_cnt(pyco.get<unsigned long int>("congestionWindowCounter")),
 	logger(pyco.get("logger")),
 	timeout(pyco.get<simTimeType>("retransmissionTimeout")),
 	ndup(pyco.get<int>("numberDupACKs")),
@@ -56,7 +56,7 @@ TahoeCongAvoid::~TahoeCongAvoid()
 }
 
 void
-TahoeCongAvoid::onSegmentLoss(segmentLoss reason, uint32_t _ackNR)
+TahoeCongAvoid::onSegmentLoss(segmentLoss reason, unsigned long int _ackNR)
 {
 	MESSAGE_SINGLE(NORMAL, logger, "onSegmentLoss called. Reason: " << printReason(reason));
 
@@ -87,7 +87,7 @@ TahoeCongAvoid::onSegmentLoss(segmentLoss reason, uint32_t _ackNR)
 			}
 			else
 			{
-				uint32_t curr_cwnd = getWindowSize();
+				unsigned long int curr_cwnd = getWindowSize();
 				setWindowSize(curr_cwnd/2);
 			}
 		}
@@ -105,7 +105,7 @@ TahoeCongAvoid::onRTTSample()
 {
 }
 
-uint32_t
+unsigned long int
 TahoeCongAvoid::getWindowSize()
 {
 	return cwnd;
@@ -136,7 +136,7 @@ TahoeCongAvoid::onSegmentAcknowledged()
 }
 
 void
-TahoeCongAvoid::setWindowSize(uint32_t new_cwnd)
+TahoeCongAvoid::setWindowSize(unsigned long int new_cwnd)
 {
 	MESSAGE_SINGLE(NORMAL, logger, "Setting window size: " << new_cwnd << "(old value: " << cwnd << ")");
 	cwnd = new_cwnd;
@@ -163,7 +163,7 @@ TahoeCongAvoid::printReason(segmentLoss reason)
 
 
 bool
-TahoeCongAvoid::duplicateACKThresholdReached(uint32_t _ackNR)
+TahoeCongAvoid::duplicateACKThresholdReached(unsigned long int _ackNR)
 {
 	if(countDuplicateACKs.knows(_ackNR))
 		return countDuplicateACKs.find(_ackNR) == ndup;

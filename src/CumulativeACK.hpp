@@ -81,12 +81,12 @@ namespace tcp {
 			/**
 			 * @brief The receiver's capacity being able to consume TCP segments
 			 */
-			uint32_t advertisedWindowSize;
+			unsigned long int advertisedWindowSize;
 
 			/**
 			 * @brief The sender's sequence number
 			 */
-			uint32_t sequenceNumber;
+			unsigned long int sequenceNumber;
 
 			/**
 			 * @brief The receiver's acknowledgement number
@@ -94,7 +94,7 @@ namespace tcp {
 			 * expected to received. All segments up to this
 			 * number - 1 are acknowledged implicitly.
 			 */
-			uint32_t ACKNumber;
+			unsigned long int ACKNumber;
 		} peer;
 
 		struct {} magic;
@@ -117,7 +117,7 @@ namespace tcp {
 		{
 		public:
 			Timeout();
-			Timeout(CumulativeACK* _parent, uint32_t seqNr, simTimeType timer):
+			Timeout(CumulativeACK* _parent, unsigned long int seqNr, simTimeType timer):
 				CanTimeout(),
 				sequenceNumber(seqNr),
 				parent(_parent),
@@ -145,7 +145,7 @@ namespace tcp {
 			}
 
 		private:
-			uint32_t sequenceNumber;
+			unsigned long int sequenceNumber;
 
 			CumulativeACK* parent;
 
@@ -155,12 +155,12 @@ namespace tcp {
 		/**
 		 * @brief Container for the time out events
 		 */
-		typedef wns::container::Registry<uint32_t, Timeout*, wns::container::registry::DeleteOnErase> Timeouts;
+		typedef wns::container::Registry<unsigned long int, Timeout*, wns::container::registry::DeleteOnErase> Timeouts;
 
 		/**
 		 * @brief Container for the compounds
 		 */
-		typedef wns::container::Registry<uint32_t, wns::ldk::CompoundPtr, wns::container::registry::NoneOnErase> Compounds;
+		typedef wns::container::Registry<unsigned long int, wns::ldk::CompoundPtr, wns::container::registry::NoneOnErase> Compounds;
 
 
 	public:
@@ -191,7 +191,7 @@ namespace tcp {
 		 * @brief Return the number of compounds being allowed to be
 		 * sent
 		 */
-		uint32_t
+		unsigned long int
 		sendCredit() const;
 
 		simTimeType
@@ -202,10 +202,10 @@ namespace tcp {
 		doWakeup();
 
 		void
-		retransmitData(const uint32_t seqNr);
+		retransmitData(const unsigned long int seqNr);
 
-		uint32_t
-		min(const uint32_t x, const uint32_t y) const;
+		unsigned long int
+		min(const unsigned long int x, const unsigned long int y) const;
 
         void
         updateTCPHeader(const wns::ldk::CompoundPtr& _compound);
@@ -227,22 +227,22 @@ namespace tcp {
 		 * @brief The receiver's buffer size being capable of processing
 		 * incoming TCP segments
 		 */
-		uint32_t advertisedWindowSize;
+		unsigned long int advertisedWindowSize;
 
 		/**
 		 * @brief The sequence number of the next segment to be sent
 		 */
-		uint32_t sequenceNR;
+		unsigned long int sequenceNR;
 
 		/**
 		 * @brief The sequence number of the next segment to be received/acknowledged
 		 */
-		uint32_t ackNR;
+		unsigned long int ackNR;
 
 		/**
 		 * @brief The last successfully received acknowledgment number.
 		 */
-		uint32_t lastACKInOrder;
+		unsigned long int lastACKInOrder;
 
 		/**
 		 * @brief Time between retransmitting a TCP segment given in seconds
@@ -276,9 +276,9 @@ namespace tcp {
          */
         wns::ldk::CommandReaderInterface* tcpHeaderReader;
         
-		uint32_t probeNumber;
+		unsigned long int probeNumber;
 
-		uint32_t instanceID;
+		unsigned long int instanceID;
 
 		bool probingEnabled;
 

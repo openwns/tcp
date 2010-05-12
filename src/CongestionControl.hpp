@@ -61,12 +61,12 @@ namespace tcp {
 		 * interface
 		 */
 		virtual void
-		onSegmentLoss(segmentLoss _sl, uint32_t _ackNR);
+		onSegmentLoss(segmentLoss _sl, unsigned long int _ackNR);
 
 		virtual void
 		onRTTSample();
 
-		virtual uint32_t
+		virtual unsigned long int
 		getWindowSize();
 
 		virtual simTimeType
@@ -76,7 +76,7 @@ namespace tcp {
 		onSegmentAcknowledged();
 
 		virtual bool
-		duplicateACKThresholdReached(uint32_t _ackNR);
+		duplicateACKThresholdReached(unsigned long int _ackNR);
 
 		virtual void
 		clearDuplicateACKCounter();
@@ -111,7 +111,7 @@ namespace tcp {
 		wns::logger::Logger logger;
 
 		virtual void
-		setWindowSize(uint32_t new_cwnd);
+		setWindowSize(unsigned long int new_cwnd);
 
 		/**
 		 * @brief Changing between SlowStart mode and
@@ -123,7 +123,7 @@ namespace tcp {
 		/**
 		 * @brief Returns the SlowStart threshold value
 		 */
-		uint32_t
+		unsigned long int
 		getSlowStartThreshold();
 	};
 } // namespace tcp

@@ -50,12 +50,12 @@ CongestionControl::~CongestionControl()
 }
 
 void
-CongestionControl::onSegmentLoss(segmentLoss reason, uint32_t _ackNR)
+CongestionControl::onSegmentLoss(segmentLoss reason, unsigned long int _ackNR)
 {
 	/**
 	 * Remember current window size
 	 */
-	uint32_t curr_cwnd;
+	unsigned long int curr_cwnd;
 
 	switch(reason)
 	{
@@ -100,7 +100,7 @@ CongestionControl::onRTTSample()
 	this->getCongestionControlMode()->onRTTSample();
 }
 
-uint32_t
+unsigned long int
 CongestionControl::getWindowSize()
 {
 	return getCongestionControlMode()->getWindowSize();
@@ -115,7 +115,7 @@ CongestionControl::getRetransmissionTimeout()
 void
 CongestionControl::onSegmentAcknowledged()
 {
-	uint32_t curr_cwnd = getWindowSize();
+	unsigned long int curr_cwnd = getWindowSize();
 
 	switch(mode)
 	{
@@ -172,13 +172,13 @@ CongestionControl::setCongestionControlMode(Mode _mode)
 }
 
 void
-CongestionControl::setWindowSize(uint32_t /*new_cwnd*/)
+CongestionControl::setWindowSize(unsigned long int /*new_cwnd*/)
 {
 	assure(false, "CongestionControl: Not allowed to set window size!");
 }
 
 
-uint32_t
+unsigned long int
 CongestionControl::getSlowStartThreshold()
 {
 	return dynamic_cast<tcp::SlowStart*>(slowStart)->getSlowStartThreshold();
@@ -186,7 +186,7 @@ CongestionControl::getSlowStartThreshold()
 
 
 bool
-CongestionControl::duplicateACKThresholdReached(uint32_t _ackNR)
+CongestionControl::duplicateACKThresholdReached(unsigned long int _ackNR)
 {
 	// forward this function to the CongestionAvoidance entity
 	return ca->duplicateACKThresholdReached(_ackNR);

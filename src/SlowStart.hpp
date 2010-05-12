@@ -49,12 +49,12 @@ namespace tcp {
 		~SlowStart();
 
 		virtual void
-		onSegmentLoss(segmentLoss _sl, uint32_t _ackNR);
+		onSegmentLoss(segmentLoss _sl, unsigned long int _ackNR);
 
 		virtual void
 		onRTTSample();
 
-		virtual uint32_t
+		virtual unsigned long int
 		getWindowSize();
 
 		virtual simTimeType
@@ -64,10 +64,10 @@ namespace tcp {
 		onSegmentAcknowledged();
 
 		virtual void
-		setWindowSize(uint32_t new_cwnd);
+		setWindowSize(unsigned long int new_cwnd);
 
 		virtual bool
-		duplicateACKThresholdReached(uint32_t _ackNR);
+		duplicateACKThresholdReached(unsigned long int _ackNR);
 
 		/**
 		 * @brief Reset counter for duplicate acks if timeout occurs
@@ -78,7 +78,7 @@ namespace tcp {
 		/**
 		 * @brief Return the SlowStart threshold value
 		 */
-		uint32_t
+		unsigned long int
 		getSlowStartThreshold();
 
 		/**
@@ -93,12 +93,12 @@ namespace tcp {
 
 		const wns::pyconfig::View pyco;
 
-		uint32_t cwnd;
+		unsigned long int cwnd;
 
 		/**
 		 * @brief Value of SlowStart's threshold
 		 */
-		uint32_t ssthresh;
+		unsigned long int ssthresh;
 
 		/**
 		 * @brief SlowStart's logger
@@ -113,8 +113,8 @@ namespace tcp {
 		/**
 		 * @brief Return the maximum of two unsigned integers
 		 */
-		uint32_t
-		max(uint32_t x, uint32_t y);
+		unsigned long int
+		max(unsigned long int x, unsigned long int y);
 	};
 } // namespace 
 

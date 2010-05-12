@@ -130,11 +130,11 @@ void
 CumulativeACKTest::sendDataStream()
 {
 	//set windowSize (implying increase of sendCredit())
-	uint32_t segments = 10;
+	unsigned long int segments = 10;
 
 	wns::ldk::CompoundPtr compound;
 
-	for (uint32_t i = 0; i < segments; i++)
+	for (unsigned long int i = 0; i < segments; i++)
 	{
 		compound = sender.fun->createCompound();
 
@@ -144,21 +144,21 @@ CumulativeACKTest::sendDataStream()
 		wns::ldk::CompoundPtr comp = sender.lower->sent.back();
 		CumulativeACKCommand* cmd = sender.cumACK->getCommand(comp->getCommandPool());
 
-		uint32_t sequenceNumber = cmd->peer.sequenceNumber;
+		unsigned long int sequenceNumber = cmd->peer.sequenceNumber;
 
 		comp = receiver.lower->sent.back();
 		cmd = receiver.cumACK->getCommand(comp->getCommandPool());
 
-		uint32_t ackNumber = cmd->peer.ACKNumber;
+		unsigned long int ackNumber = cmd->peer.ACKNumber;
 
 		CPPUNIT_ASSERT_EQUAL(ackNumber, sequenceNumber + 1);
 	}
 
 	CPPUNIT_ASSERT_EQUAL(segments, sender.lower->sent.size());
 
-	for (uint32_t i = 0; i < segments; i++)
+	for (unsigned long int i = 0; i < segments; i++)
 	{
-		uint32_t windowSize = sender.cumACK->sendCredit();
+		unsigned long int windowSize = sender.cumACK->sendCredit();
 
 		wns::ldk::CompoundPtr comp = receiver.lower->sent[i];
 
@@ -175,11 +175,11 @@ CumulativeACKTest::sendDataStream()
 void
 CumulativeACKTest::dropPacket()
 {
-	uint32_t segments = 10;
+	unsigned long int segments = 10;
 
-	uint32_t droppedPacket = 6;
+	unsigned long int droppedPacket = 6;
 
-	for(uint32_t i = 0; i < segments; ++i)
+	for(unsigned long int i = 0; i < segments; ++i)
 	{
 		wns::ldk::CompoundPtr compound = sender.fun->createCompound();
 
@@ -199,12 +199,12 @@ CumulativeACKTest::dropPacket()
 		wns::ldk::CompoundPtr comp = sender.lower->sent.back();
 		CumulativeACKCommand* cmd = sender.cumACK->getCommand(comp->getCommandPool());
 
-		uint32_t sequenceNumber = cmd->peer.sequenceNumber;
+		unsigned long int sequenceNumber = cmd->peer.sequenceNumber;
 
 		comp = receiver.lower->sent.back();
 		cmd = receiver.cumACK->getCommand(comp->getCommandPool());
 
-		uint32_t ackNumber = cmd->peer.ACKNumber;
+		unsigned long int ackNumber = cmd->peer.ACKNumber;
 
 		if (i >= (droppedPacket -1))
 		{
@@ -221,22 +221,22 @@ CumulativeACKTest::dropPacket()
 void
 CumulativeACKTest::delayPacket()
 {
-	uint32_t segments = 20;
+	unsigned long int segments = 20;
 
-	uint32_t delayedPacket = 8;
+	unsigned long int delayedPacket = 8;
 	// 4 packets behind schedule
-	uint32_t delay = delayedPacket + 4;
+	unsigned long int delay = delayedPacket + 4;
 
 	wns::ldk::CompoundPtr compound, ackCompound, delayedCompound;
 
-	for(uint32_t i = 0; i < segments; i++)
+	for(unsigned long int i = 0; i < segments; i++)
 	{
 		compound = sender.fun->createCompound();
 
 		sender.cumACK->doSendData(compound);
 
 		CumulativeACKCommand* cmd = sender.cumACK->getCommand(compound->getCommandPool());
-		uint32_t sequenceNumber = cmd->peer.sequenceNumber;
+		unsigned long int sequenceNumber = cmd->peer.sequenceNumber;
 
 		if(i != delayedPacket)
 		{
@@ -254,7 +254,7 @@ CumulativeACKTest::delayPacket()
 		sender.lower->getDeliverer()->getAcceptor(ackCompound)->onData(ackCompound);
 
 		cmd = sender.cumACK->getCommand(ackCompound->getCommandPool());
-		uint32_t ackNumber = cmd->peer.ACKNumber;
+		unsigned long int ackNumber = cmd->peer.ACKNumber;
 
 		// until packets arrive out of order ack with the next packet
 		// number expected.
@@ -292,7 +292,7 @@ CumulativeACKTest::timeOut()
 	wns::ldk::CompoundPtr comp = sender.lower->sent.back();
 	CumulativeACKCommand* cmd = sender.cumACK->getCommand(comp->getCommandPool());
 	// remember the sequence number
-	uint32_t first = cmd->peer.sequenceNumber;
+	unsigned long int first = cmd->peer.sequenceNumber;
 	// dequeue the compound
 	sender.lower->sent.pop_back();
 
@@ -303,7 +303,7 @@ CumulativeACKTest::timeOut()
 	// get the resent compound
 	comp = sender.lower->sent.back();
 	cmd = sender.cumACK->getCommand(comp->getCommandPool());
-	uint32_t second = cmd->peer.sequenceNumber;
+	unsigned long int second = cmd->peer.sequenceNumber;
 	sender.lower->sent.pop_back();
 
 	// first compound being retransmitted?

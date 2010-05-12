@@ -55,12 +55,12 @@ namespace tcp {
 		~CongestionControlStrategy() {}
 
 		virtual void
-		onSegmentLoss(segmentLoss _sl, uint32_t _ackNR) = 0;
+		onSegmentLoss(segmentLoss _sl, unsigned long int _ackNR) = 0;
 
 		virtual void
 		onRTTSample() = 0;
 
-		virtual uint32_t
+		virtual unsigned long int
 		getWindowSize() = 0;
 
 		virtual simTimeType
@@ -70,14 +70,14 @@ namespace tcp {
 		onSegmentAcknowledged() = 0;
 
 		virtual bool
-		duplicateACKThresholdReached(uint32_t _ackNR) = 0;
+		duplicateACKThresholdReached(unsigned long int _ackNR) = 0;
 
 		virtual void
 		clearDuplicateACKCounter() = 0;
 
 	protected:
 		virtual void
-		setWindowSize(uint32_t new_cwnd) = 0;
+		setWindowSize(unsigned long int new_cwnd) = 0;
 
 		/**
 		 * @brief CongestionControl is either in SlowStart mode

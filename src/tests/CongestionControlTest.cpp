@@ -106,12 +106,12 @@ CongestionControlTest::slowStartMode()
 	f << "Slow start threshold: " << cc->getSlowStartThreshold() << std::endl << std::endl;
 	f << std::setw(15) << "prev_cwnd:" << std::setw(13) << "cwnd" << std::endl;
 
-	uint32_t prev_cwnd;
+	unsigned long int prev_cwnd;
 
 	while (cc->slowStart->getWindowSize() <= cc->getSlowStartThreshold()) {
 		prev_cwnd = cc->slowStart->getWindowSize();
 
-		for(uint32_t i=1; i<= prev_cwnd; i++){
+		for(unsigned long int i=1; i<= prev_cwnd; i++){
 			cc->slowStart->onSegmentAcknowledged();
 		}
 		f << std::setw(12) << prev_cwnd << std::setw(15) << cc->slowStart->getWindowSize() << std::endl;
@@ -140,11 +140,11 @@ CongestionControlTest::congestionAvoidanceMode()
 	cc->setCongestionControlMode(cc->CONGESTION_AVOIDANCE);
 	CPPUNIT_ASSERT_EQUAL(cc->ca, cc->getCongestionControlMode());
 
-	uint32_t prev_cwnd;
+	unsigned long int prev_cwnd;
 
 	while (cc->getWindowSize() <= 2048) {
 		prev_cwnd = cc->getWindowSize();
-		for(uint32_t i=0; i<=prev_cwnd; i++){
+		for(unsigned long int i=0; i<=prev_cwnd; i++){
 			CPPUNIT_ASSERT_EQUAL(prev_cwnd, cc->getWindowSize());
 			// assure congestion avoidance mode by calling the
 			// method of the ca instance
@@ -174,7 +174,7 @@ CongestionControlTest::changeModes()
 
 	// No. 1:
 	cc->setCongestionControlMode(cc->SLOWSTART);
-	CPPUNIT_ASSERT_EQUAL(uint32_t(65537), cc->getSlowStartThreshold()); // ssthresh according to pyconfig
+	CPPUNIT_ASSERT_EQUAL((unsigned long int)(65537), cc->getSlowStartThreshold()); // ssthresh according to pyconfig
 	CPPUNIT_ASSERT_EQUAL(cc->slowStart, cc->getCongestionControlMode());
 
 	// assure "safe area"
@@ -182,12 +182,12 @@ CongestionControlTest::changeModes()
 							     // >> 0 and <<
 							     // ssthresh
 	// remember window size
-	uint32_t windowSize = cc->getWindowSize();
+	unsigned long int windowSize = cc->getWindowSize();
 	CPPUNIT_ASSERT(windowSize <= cc->getSlowStartThreshold());
-	cc->onSegmentLoss(cc->TIMEOUT, uint32_t(0));
+	cc->onSegmentLoss(cc->TIMEOUT, (unsigned long int)(0));
 	CPPUNIT_ASSERT_EQUAL(cc->slowStart, cc->getCongestionControlMode());
 	CPPUNIT_ASSERT_EQUAL(windowSize / 2, cc->getSlowStartThreshold());
-	CPPUNIT_ASSERT_EQUAL(uint32_t(1), cc->getWindowSize());
+	CPPUNIT_ASSERT_EQUAL((unsigned long int)(1), cc->getWindowSize());
 
 
 	// No. 2:
@@ -201,7 +201,7 @@ CongestionControlTest::changeModes()
 	CPPUNIT_ASSERT_EQUAL(cc->getCongestionControlMode(), cc->slowStart);
 
 	// change mode with next ack
-	uint32_t tmp_ssthresh = cc->getSlowStartThreshold();
+	unsigned long int tmp_ssthresh = cc->getSlowStartThreshold();
 	cc->onSegmentAcknowledged();
 	CPPUNIT_ASSERT_EQUAL(cc->ca, cc->getCongestionControlMode());
 	CPPUNIT_ASSERT_EQUAL(tmp_ssthresh+1, cc->getWindowSize());
@@ -211,26 +211,26 @@ CongestionControlTest::changeModes()
 	// a) congestion = timeout
 	// reset congestion window
 	cc->setCongestionControlMode(cc->CONGESTION_AVOIDANCE);
-	cc->ca->setWindowSize(uint32_t(16384));
+	cc->ca->setWindowSize((unsigned long int)(16384));
 
 	CPPUNIT_ASSERT_EQUAL(cc->ca, cc->getCongestionControlMode());
 
-	cc->onSegmentLoss(cc->TIMEOUT, uint32_t(0));
+	cc->onSegmentLoss(cc->TIMEOUT, (unsigned long int)(0));
 
-	CPPUNIT_ASSERT_EQUAL(uint32_t(1), cc->getWindowSize());
+	CPPUNIT_ASSERT_EQUAL((unsigned long int)(1), cc->getWindowSize());
 	CPPUNIT_ASSERT_EQUAL(cc->slowStart, cc->getCongestionControlMode());
 
 	// b) congestion = 3 ACKs of same number in a row
 	cc->setCongestionControlMode(cc->CONGESTION_AVOIDANCE);
-	cc->ca->setWindowSize(uint32_t(16384));
+	cc->ca->setWindowSize((unsigned long int)(16384));
 
 	CPPUNIT_ASSERT_EQUAL(cc->ca, cc->getCongestionControlMode());
 
-	cc->onSegmentLoss(cc->TIMEOUT, uint32_t(0));
-	cc->onSegmentLoss(cc->TIMEOUT, uint32_t(0));
-	cc->onSegmentLoss(cc->TIMEOUT, uint32_t(0));
+	cc->onSegmentLoss(cc->TIMEOUT, (unsigned long int)(0));
+	cc->onSegmentLoss(cc->TIMEOUT, (unsigned long int)(0));
+	cc->onSegmentLoss(cc->TIMEOUT, (unsigned long int)(0));
 
-	CPPUNIT_ASSERT_EQUAL(uint32_t(1), cc->getWindowSize());
+	CPPUNIT_ASSERT_EQUAL((unsigned long int)(1), cc->getWindowSize());
 	CPPUNIT_ASSERT_EQUAL(cc->slowStart, cc->getCongestionControlMode());
 }
 
